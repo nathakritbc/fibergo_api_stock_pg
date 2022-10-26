@@ -104,7 +104,7 @@ func UpdateProduct(c *fiber.Ctx) error {
 	if err != nil {
 		// error handling...
 		log.Print(err)
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
 	response := fiber.Map{
@@ -125,13 +125,13 @@ func DeleteProduct(c *fiber.Ctx) error {
 	err := db.First(&product, id).Error
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
 	err = db.Delete(&product, id).Error
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
 	response := fiber.Map{

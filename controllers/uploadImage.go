@@ -33,7 +33,7 @@ func UploadImage(c *fiber.Ctx) error {
 	file, err := c.FormFile("image")
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
 	imageType := file.Header["Content-Type"][0]
@@ -41,7 +41,7 @@ func UploadImage(c *fiber.Ctx) error {
 	if err != nil {
 		file = nil
 		log.Print(err)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
 	uuid := guuid.New().String()
@@ -58,13 +58,13 @@ func RemoveImage(c *fiber.Ctx) error {
 	_, e := os.Stat(filePath)
 	if e != nil {
 		fmt.Printf("File does not exist")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": e.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": e.Error()})
 	}
 
 	err := os.Remove(filePath)
 	if err != nil {
 		log.Fatal(err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": e.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": e.Error()})
 	}
 
 	messageResponse := "remove files " + fileName + " successfully"

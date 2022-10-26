@@ -21,13 +21,13 @@ func Register(c *fiber.Ctx) error {
 	err := c.BodyParser(&user)
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
 	errors := helpers.ValidateStructUser(user)
 	if errors != nil {
 		log.Print(errors)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": errors})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": errors})
 
 	}
 
@@ -37,7 +37,7 @@ func Register(c *fiber.Ctx) error {
 	err = db.Create(&user).Error
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
 	return c.JSON(fiber.Map{"message": "User was registered successfully!"})
@@ -55,7 +55,7 @@ func Login(c *fiber.Ctx) error {
 	errors := helpers.ValidateStructUser(user)
 	if errors != nil {
 		log.Print(errors)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": errors})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": errors})
 	}
 
 	passwordInput := user.U_password
@@ -64,11 +64,11 @@ func Login(c *fiber.Ctx) error {
 	err = db.First(&user, "u_email = ?", user.U_email).Error
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": "User Not found."})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "error", "message": "User Not found."})
 	}
 
 	if !checkPasswordHash(passwordInput, user.U_password) {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Invalid Password!"})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": "error", "message": "Invalid Password!"})
 
 	}
 
@@ -88,7 +88,7 @@ func Login(c *fiber.Ctx) error {
 	t, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
 	//	create response
