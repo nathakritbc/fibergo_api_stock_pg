@@ -1,0 +1,1 @@
+web: bin/fibergo_api_stock_pg
