@@ -10,10 +10,13 @@ import (
 func SetupRoutes(app *fiber.App) {
 
 	// app.Get("/*", configs.ConfigAuth)
-	app.Static("/", "./images")
+
+	apiVersion := "/api/v1"
+
+	app.Static(apiVersion, "./images")
 
 	// group  route
-	apiV1 := app.Group("/api/v1")
+	apiV1 := app.Group(apiVersion)
 	auth := apiV1.Group("/auth") // auth
 	product := apiV1.Group("/products", configs.ConfigAuth)
 	uploadImage := apiV1.Group("/uploadImages", configs.ConfigAuth)
