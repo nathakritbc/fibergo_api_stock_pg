@@ -6,34 +6,36 @@ import (
 	_ "fibergo_api_stock_pg/helpers"
 	"fibergo_api_stock_pg/models"
 	"mime/multipart"
-	"strings"
+
+	// "strings"
 
 	"fmt"
 	"log"
-	"os"
+
+	// "os"
 
 	"github.com/gofiber/fiber/v2"
 	guuid "github.com/google/uuid"
 )
 
-func removeImage(removePath string, c *fiber.Ctx) error {
-	e := os.Remove(removePath)
-	if e != nil {
-		log.Fatal(e)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": e.Error()})
-	}
-	return nil
-}
+// func removeImage(removePath string, c *fiber.Ctx) error {
+// 	e := os.Remove(removePath)
+// 	if e != nil {
+// 		log.Fatal(e)
+// 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": e.Error()})
+// 	}
+// 	return nil
+// }
 
-func checkImageType(imageType string, c *fiber.Ctx) error {
+// func checkImageType(imageType string, c *fiber.Ctx) error {
 
-	runes := []rune(imageType)
-	imgType := strings.TrimSpace(string(runes[0:5]))
-	if imgType != "image" {
-		return fiber.NewError(fiber.StatusBadRequest, "error not found image type")
-	}
-	return nil
-}
+// 	runes := []rune(imageType)
+// 	imgType := strings.TrimSpace(string(runes[0:5]))
+// 	if imgType != "image" {
+// 		return fiber.NewError(fiber.StatusBadRequest, "error not found image type")
+// 	}
+// 	return nil
+// }
 
 func uploadImage(file *multipart.FileHeader, newFileName string, c *fiber.Ctx) error {
 	c.SaveFile(file, fmt.Sprintf("./images/%s", newFileName))
@@ -46,7 +48,7 @@ func GetProductsAll(c *fiber.Ctx) error {
 	err := db.Find(&product).Error
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 	return c.JSON(product)
 }
@@ -59,7 +61,7 @@ func GetProduct(c *fiber.Ctx) error {
 	err := db.Find(&product, id).Error
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
 	if product.ID == 0 {
@@ -74,43 +76,17 @@ func CreateProduct(c *fiber.Ctx) error {
 
 	product := models.Product{}
 
-	file, err := c.FormFile("p_image")
+	err := c.BodyParser(&product)
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
-	imageType := file.Header["Content-Type"][0]
-	err = checkImageType(imageType, c)
-	if err != nil {
-		file = nil
-		log.Print(err)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
-	}
-
-	err = c.BodyParser(&product)
-	if err != nil {
-		file = nil
-		log.Print(err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
-	}
-
-	errors := helpers.ValidateStructProduct(product)
-	if errors != nil {
-		log.Print(errors)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": errors})
-	}
-
-	uuid := guuid.New().String()
-	newFileName := uuid + file.Filename
-	uploadImage(file, newFileName, c)
-
-	product.P_Image = newFileName
 	db := database.DBConn
 	err = db.Create(&product).Error
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
 	response := fiber.Map{
@@ -130,13 +106,13 @@ func UpdateProduct(c *fiber.Ctx) error {
 	err := c.BodyParser(&product)
 	if err != nil {
 		log.Print(err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
 
 	errors := helpers.ValidateStructProduct(product)
 	if errors != nil {
 		log.Print(errors)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": errors})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": errors})
 	}
 
 	db := database.DBConn
@@ -178,10 +154,10 @@ func UpdateProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": err.Error()})
 	}
 
-	if errImgForm == nil {
-		removePath := "./images/" + productById.P_Image
-		removeImage(removePath, c)
-	}
+	// if errImgForm == nil {
+	// 	removePath := "./images/" + productById.P_Image
+	// 	// removeImage(removePath, c)
+	// }
 
 	response := fiber.Map{
 		"result":  product,
@@ -210,8 +186,8 @@ func DeleteProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": err.Error()})
 	}
 
-	removePath := "./images/" + product.P_Image
-	removeImage(removePath, c)
+	// removePath := "./images/" + product.P_Image
+	// removeImage(removePath, c)
 
 	response := fiber.Map{
 		"message": "Product Successfully deleted.",

@@ -16,6 +16,8 @@ func SetupRoutes(app *fiber.App) {
 	apiV1 := app.Group("/api/v1")
 	auth := apiV1.Group("/auth") // auth
 	product := apiV1.Group("/products", configs.ConfigAuth)
+	uploadImage := apiV1.Group("/uploadImages", configs.ConfigAuth)
+
 	user := apiV1.Group("/users", configs.ConfigAuth)
 
 	// auth route
@@ -31,5 +33,8 @@ func SetupRoutes(app *fiber.App) {
 	product.Post("/", controllers.CreateProduct)
 	product.Put("/:id", controllers.UpdateProduct)
 	product.Delete("/:id", controllers.DeleteProduct)
+
+	uploadImage.Post("/", controllers.UploadImage)
+	uploadImage.Delete("/:fileName", controllers.RemoveImage)
 
 }
