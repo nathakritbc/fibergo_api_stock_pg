@@ -4,21 +4,18 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=${PSQL_USER_DEV}
-      - POSTGRES_PASSWORD=${PSQL_PASS_DEV}
-      - POSTGRES_DB=${PSQL_DB_NAME_DEV}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345678
+      - POSTGRES_DB=fibergo_api_stock_pg
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - db-data:/var/lib/postgresql/data/pgdata
     restart: always
     ports:
       - "5432:5432"
-    env_file:
-      - .env  
 
-  go:
-    container_name: go
-    restart: always
+  goservice:
+    container_name: goservice
     build:
       context: .
     depends_on:
@@ -26,6 +23,13 @@ services:
         # condition: service_healthy # waiting until heathcheck of postgres is good
     ports:
       - "9090:9090"
+  
+  nginx:
+    build: "./nginx"
+    ports:
+      - "80:80"
+    depends_on:
+      - "goservice"
 
   pgadmin:
     image: dpage/pgadmin4
