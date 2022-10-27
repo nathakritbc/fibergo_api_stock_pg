@@ -14,8 +14,8 @@ services:
     ports:
       - "5432:5432"
 
-  goservice:
-    container_name: goservice
+  go:
+    container_name: go
     build:
       context: .
     depends_on:
@@ -23,8 +23,6 @@ services:
         # condition: service_healthy # waiting until heathcheck of postgres is good
     ports:
       - "9090:9090"
-  
- 
 
   pgadmin:
     image: dpage/pgadmin4
