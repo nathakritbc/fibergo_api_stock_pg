@@ -24,12 +24,7 @@ services:
     ports:
       - "9090:9090"
   
-  nginx:
-    build: "./nginx"
-    ports:
-      - "80:80"
-    depends_on:
-      - "goservice"
+ 
 
   pgadmin:
     image: dpage/pgadmin4
