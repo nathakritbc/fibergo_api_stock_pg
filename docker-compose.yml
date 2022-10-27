@@ -4,18 +4,21 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=12345678
-      - POSTGRES_DB=fibergo_api_stock_pg
+      - POSTGRES_USER=${PSQL_USER_DEV}
+      - POSTGRES_PASSWORD=${PSQL_PASS_DEV}
+      - POSTGRES_DB=${PSQL_DB_NAME_DEV}
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - db-data:/var/lib/postgresql/data/pgdata
     restart: always
     ports:
       - "5432:5432"
+    env_file:
+      - .env  
 
   go:
     container_name: go
+    restart: always
     build:
       context: .
     depends_on:
